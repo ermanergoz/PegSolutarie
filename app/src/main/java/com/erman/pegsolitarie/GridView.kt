@@ -30,17 +30,12 @@ class GridView(
         }
         cellWidth = screenWidth / numColumns
         cellHeight = (screenHeight) / numRows
-
         invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         calculateDimensions()
 
-        canvas.drawColor(Color.WHITE)
-        if (numColumns == 0 || numRows == 0) {
-            return
-        }
         drawGridLines(canvas)
         paintCorners(canvas)
         paintCell(canvas)
@@ -97,9 +92,9 @@ class GridView(
             val row = (event.y / cellHeight).toInt()
 
             if (row < numRows && column < numColumns) {
-                if (cells[column][row] == 1)
+                if (cells[column][row] == 1 && cells[column][row] != -1)
                     cells[column][row] = 0
-                else
+                else if(cells[column][row] != -1)
                     cells[column][row] = 1
 
                 invalidate()

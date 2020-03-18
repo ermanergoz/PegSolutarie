@@ -1,1 +1,1 @@
-# PegSolutarie
+# PegSolitarie

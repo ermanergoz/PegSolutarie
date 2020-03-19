@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat.getColor
 
 class GridView(
     context: Context?,
@@ -19,7 +20,10 @@ class GridView(
 
     private var cellWidth = 0
     private var cellHeight = 0
-    private val blackPaint: Paint = Paint()
+    private val pegPaint: Paint = Paint()
+    private val pegSlotPaint: Paint = Paint()
+    private val pegSlotWidth: Float = 10F
+    private val pegMargin: Float = 5F
     private val cornerPaint: Paint = Paint()
     private var numColumns: Int = cells.size
     private var numRows: Int = cells[0].size
@@ -35,53 +39,24 @@ class GridView(
 
     override fun onDraw(canvas: Canvas) {
         calculateDimensions()
-
-        drawGridLines(canvas)
-        paintCorners(canvas)
-        paintCell(canvas)
+        paintCells(canvas)
     }
 
-    private fun paintCorners(canvas: Canvas) {
-        for (i in cells.indices) {
-            for (j in cells[i].indices) {
-                if (cells[i][j] == -1)
-                    canvas.drawRect(
-                        (i * (cellWidth + 0.2)).toFloat(), (j * (cellHeight + 0.2)).toFloat(),
-                        ((i + 1) * (cellWidth + 0.2)).toFloat(), ((j + 1) * (cellHeight + 0.2)).toFloat(),
-                        cornerPaint
-                    )
-            }
-        }
-    }
-
-    private fun drawGridLines(canvas: Canvas) {
-        for (i in 0 until numColumns + 1) {
-            canvas.drawLine(
-                (i * cellWidth).toFloat(), 0F,
-                (i * cellWidth).toFloat(), height.toFloat(), blackPaint
-            )
-        }
-        for (i in 0 until numRows + 1) {
-            canvas.drawLine(
-                0F, (i * cellHeight).toFloat(),
-                width.toFloat(), (i * cellHeight).toFloat(), blackPaint
-            )
-        }
-    }
-
-    private fun paintCell(canvas: Canvas) {
+    private fun paintCells(canvas: Canvas) {
         for (i in 0 until numColumns) {
             for (j in 0 until numRows) {
-                if (cells[i][j] == 1 && cells[i][j] != -1) {
-                    val centerX = (((i * cellWidth) + (((i + 1) * cellWidth))) / 2).toFloat()
-                    val centerY = (((j * cellHeight) + (((j + 1) * cellHeight))) / 2).toFloat()
 
-                    val radius = if (cellWidth < cellHeight)
-                        (cellWidth / 2).toFloat()
-                    else (cellHeight / 2).toFloat()
+                val centerX = (((i * cellWidth) + (((i + 1) * cellWidth))) / 2).toFloat()
+                val centerY = (((j * cellHeight) + (((j + 1) * cellHeight))) / 2).toFloat()
 
-                    canvas.drawCircle(centerX, centerY, radius, blackPaint)
-                }
+                val radius = if (cellWidth < cellHeight)
+                    (cellWidth / 2).toFloat()
+                else (cellHeight / 2).toFloat()
+
+                if (cells[i][j] == 1 && cells[i][j] != -1)
+                    canvas.drawCircle(centerX, centerY, radius-pegMargin, pegPaint)
+                else if (cells[i][j] == 0 && cells[i][j] != -1)
+                    canvas.drawCircle(centerX, centerY, radius-pegSlotWidth-pegMargin, pegSlotPaint)
             }
         }
     }
@@ -94,7 +69,7 @@ class GridView(
             if (row < numRows && column < numColumns) {
                 if (cells[column][row] == 1 && cells[column][row] != -1)
                     cells[column][row] = 0
-                else if(cells[column][row] != -1)
+                else if (cells[column][row] != -1)
                     cells[column][row] = 1
 
                 invalidate()
@@ -105,6 +80,10 @@ class GridView(
 
     init {
         cornerPaint.color = Color.WHITE
-        blackPaint.style = Paint.Style.FILL_AND_STROKE
+        pegPaint.color = getColor(context!!, R.color.pegColor)
+        pegPaint.style = Paint.Style.FILL_AND_STROKE
+        pegSlotPaint.style = Paint.Style.STROKE
+        pegSlotPaint.strokeWidth = pegSlotWidth
+        pegSlotPaint.color = getColor(context, R.color.pegSlotColor)
     }
 }

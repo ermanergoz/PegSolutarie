@@ -5,8 +5,9 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
+import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), GameSelectionFragmentListener {
+class MainActivity : AppCompatActivity(), GameSelectionDialogListener {
 
     private val fragmentManager: FragmentManager = supportFragmentManager
 
@@ -16,17 +17,19 @@ class MainActivity : AppCompatActivity(), GameSelectionFragmentListener {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
-        fragmentManager.beginTransaction().replace(R.id.fragmentContainer, GameSelectionFragment()).addToBackStack("").commit()
+        gameGridHolder.addView(constructEnglishBoard(this))
+
+        gameMenuButton.setOnClickListener {
+            val newFragment = GameSelectionFragment()
+            newFragment.show(fragmentManager, "")
+        }
+
     }
 
-    override fun gameSelectionFragmentListener(selectedGame: String) {
-        fragmentManager.beginTransaction().replace(R.id.fragmentContainer, GameFragment(selectedGame)).addToBackStack("").commit()
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-
-        if (fragmentManager.backStackEntryCount == 0)
-            finish()
+    override fun gameSelectionDialogListener(gameSelection: String) {
+        if(gameSelection == KEY_ENGLISH_BOARD) {
+            gameGridHolder.removeAllViews()
+            gameGridHolder.addView(constructEnglishBoard(this))
+        }
     }
 }

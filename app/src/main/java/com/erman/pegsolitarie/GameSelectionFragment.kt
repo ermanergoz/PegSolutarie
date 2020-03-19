@@ -1,41 +1,61 @@
 package com.erman.pegsolitarie
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.fragment_game_selection.*
+import android.widget.Button
+import androidx.fragment.app.DialogFragment
 
-class GameSelectionFragment : Fragment() {
+class GameSelectionFragment : DialogFragment() {
 
-    private lateinit var listener: GameSelectionFragmentListener
+    private lateinit var listener: GameSelectionDialogListener
+    private lateinit var dialogView: View
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_game_selection, container, false)
-    }
+    private lateinit var frenchButton: Button
+    private lateinit var germanButton: Button
+    private lateinit var asymmetricalButton: Button
+    private lateinit var englishButton: Button
+    private lateinit var diamondButton: Button
+    private lateinit var triangularButton: Button
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        
-        englishButton.setOnClickListener { 
-            listener.gameSelectionFragmentListener(KEY_ENGLISH_BOARD)
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    return activity?.let {
+
+        val builder = AlertDialog.Builder(it)
+        val inflater = requireActivity().layoutInflater
+        dialogView = inflater.inflate(R.layout.dialog_game_selection, null)
+
+        this.frenchButton = dialogView.findViewById(R.id.frenchButton)
+        this.germanButton = dialogView.findViewById(R.id.germanButton)
+        this.asymmetricalButton = dialogView.findViewById(R.id.asymmetricalButton)
+        this.englishButton = dialogView.findViewById(R.id.englishButton)
+        this.diamondButton = dialogView.findViewById(R.id.diamondButton)
+        this.triangularButton = dialogView.findViewById(R.id.triangularButton)
+
+        englishButton.setOnClickListener {
+            listener.gameSelectionDialogListener(KEY_ENGLISH_BOARD)
+            dialog?.dismiss()
         }
-    }
+
+        builder.setView(dialogView)
+        builder.create()
+    } ?: throw IllegalStateException("Activity cannot be null")
+}
     
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
         try {
-            listener = context as GameSelectionFragmentListener
+            listener = context as GameSelectionDialogListener
         } catch (err: ClassCastException) {
-            Log.e("error", "must implement GameSelectionFragmentListener")
+            Log.e("error", "must implement GameSelectionDialogListener")
         }
     }
 }
 
-interface GameSelectionFragmentListener {
-    fun gameSelectionFragmentListener(selectedGame: String)
+interface GameSelectionDialogListener {
+    fun gameSelectionDialogListener(selectedGame: String)
 }

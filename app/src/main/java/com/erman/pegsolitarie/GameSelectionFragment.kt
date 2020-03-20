@@ -37,5 +37,5 @@ class GameSelectionFragment : Fragment() {
 }
 
 interface GameSelectionDialogListener {
-    fun gameSelectionDialogListener(selectedGame: String)
+    fun gameSelectionDialogListener(boardSelection: String)
 }

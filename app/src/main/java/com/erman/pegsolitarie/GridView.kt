@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat.getColor
@@ -27,6 +28,11 @@ class GridView(
     private val cornerPaint: Paint = Paint()
     private var numColumns: Int = cells.size
     private var numRows: Int = cells[0].size
+    private var isFirstClick = true
+    private var columnFirst = 0
+    private var rowFirst = 0
+    private var columnSecond = 0
+    private var rowSecond = 0
 
     private fun calculateDimensions() {
         if (numColumns < 1 || numRows < 1) {
@@ -54,26 +60,38 @@ class GridView(
                 else (cellHeight / 2).toFloat()
 
                 if (cells[i][j] == 1 && cells[i][j] != -1)
-                    canvas.drawCircle(centerX, centerY, radius-pegMargin, pegPaint)
+                    canvas.drawCircle(centerX, centerY, radius - pegMargin, pegPaint)
                 else if (cells[i][j] == 0 && cells[i][j] != -1)
-                    canvas.drawCircle(centerX, centerY, radius-pegSlotWidth-pegMargin, pegSlotPaint)
+                    canvas.drawCircle(centerX, centerY, radius - pegSlotWidth - pegMargin, pegSlotPaint)
             }
         }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN) {
-            val column = (event.x / cellWidth).toInt()
-            val row = (event.y / cellHeight).toInt()
+            if (isFirstClick) {
+                columnFirst = (event.x / cellWidth).toInt()
+                rowFirst = (event.y / cellHeight).toInt()
 
-            if (row < numRows && column < numColumns) {
-                if (cells[column][row] == 1 && cells[column][row] != -1)
-                    cells[column][row] = 0
-                else if (cells[column][row] != -1)
-                    cells[column][row] = 1
+                isFirstClick = false
+            } else {
+                columnSecond = (event.x / cellWidth).toInt()
+                rowSecond = (event.y / cellHeight).toInt()
 
-                invalidate()
+                if (rowFirst < numRows && columnFirst < numColumns) {
+
+                    if (cells[columnFirst][rowFirst] != -1 && cells[columnSecond][rowSecond] != -1) {
+                        //cells[column][row] = 0
+                        canMove(cells, rowFirst, columnFirst, rowSecond, columnSecond)
+                        Log.e("is game over", isGameOver(cells).toString())
+                    } /*else if (cells[column][row] != -1)
+                    cells[column][row] = 1*/
+
+                    isFirstClick = true
+                    invalidate()
+                }
             }
+
         }
         return true
     }

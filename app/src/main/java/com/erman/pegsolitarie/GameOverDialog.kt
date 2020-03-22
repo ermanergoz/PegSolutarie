@@ -17,8 +17,7 @@ class GameOverDialog(private var elapsedTime: String, private var score: String)
     private lateinit var dialogView: View
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return activity?.let {
-
+        val dialog: AlertDialog = activity?.let {
             val builder = AlertDialog.Builder(it)
             val inflater = requireActivity().layoutInflater
             dialogView = inflater.inflate(R.layout.dialog_game_over, null)
@@ -45,6 +44,9 @@ class GameOverDialog(private var elapsedTime: String, private var score: String)
             builder.setView(dialogView)
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
+
+        dialog.setCanceledOnTouchOutside(false)
+        return dialog
     }
 
     override fun onAttach(context: Context) {

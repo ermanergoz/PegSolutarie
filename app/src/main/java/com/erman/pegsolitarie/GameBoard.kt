@@ -5,27 +5,32 @@ import android.content.res.Resources
 import android.util.TypedValue
 import android.view.View
 
-private const val gameGridHolderHeightOffset = 160f
+class GameBoard(private var context: Context) {
 
-fun constructEnglishBoard(context: Context): View {
-    val px = TypedValue.applyDimension(
+    private val px = TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP,
-        gameGridHolderHeightOffset,
+        GAME_GRID_HOLDER_HEIGHT_MARGIN,
         context.resources.displayMetrics
     )
+    private val screenWidth = Resources.getSystem().displayMetrics.widthPixels
+    private val screenHeight = Resources.getSystem().displayMetrics.heightPixels - px.toInt()
 
-    val screenWidth = Resources.getSystem().displayMetrics.widthPixels
-    val screenHeight = Resources.getSystem().displayMetrics.heightPixels - px.toInt()
+    private lateinit var cells: Array<IntArray>
 
-    val cells: Array<IntArray> = arrayOf(
-        intArrayOf(-1, -1, 1, 1, 1, -1, -1),
-        intArrayOf(-1, -1, 1, 1, 1, -1, -1),
-        intArrayOf(1, 1, 1, 1, 1, 1, 1),
-        intArrayOf(1, 1, 1, 0, 1, 1, 1),
-        intArrayOf(1, 1, 1, 1, 1, 1, 1),
-        intArrayOf(-1, -1, 1, 1, 1, -1, -1),
-        intArrayOf(-1, -1, 1, 1, 1, -1, -1)
-    )   //-1 is dead cell, 1 is peg, 0 is empty
+    fun constructEnglishBoard(): View {
+        cells = arrayOf(
+            intArrayOf(-1, -1, 1, 1, 1, -1, -1),
+            intArrayOf(-1, -1, 1, 1, 1, -1, -1),
+            intArrayOf(1, 1, 1, 1, 1, 1, 1),
+            intArrayOf(1, 1, 1, 0, 1, 1, 1),
+            intArrayOf(1, 1, 1, 1, 1, 1, 1),
+            intArrayOf(-1, -1, 1, 1, 1, -1, -1),
+            intArrayOf(-1, -1, 1, 1, 1, -1, -1)
+        )   //-1 is dead cell, 1 is peg, 0 is empty
+        return GridView(context, screenWidth, screenHeight, cells, null)
+    }
 
-    return GridView(context, screenWidth, screenHeight, cells, null)
+    fun getCells(): Array<IntArray> {
+        return this.cells
+    }
 }

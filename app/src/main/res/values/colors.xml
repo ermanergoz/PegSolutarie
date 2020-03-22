@@ -4,5 +4,6 @@
     <color name="colorPrimaryDark">#168DDA</color>
     <color name="colorAccent">#168DDA</color>
     <color name="pegColor">#E44545</color>
+    <color name="markedPegColor">#168DDA</color>
     <color name="pegSlotColor">#2B2B2B</color>
 </resources>

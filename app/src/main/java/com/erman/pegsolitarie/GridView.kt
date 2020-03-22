@@ -11,35 +11,25 @@ import android.view.View
 import androidx.core.content.ContextCompat.getColor
 
 class GridView(
-    context: Context?,
-    private var screenWidth: Int,
-    private var screenHeight: Int,
-    private var cells: Array<IntArray>,
+    context: Context?, private var screenWidth: Int, private var screenHeight: Int, private var cells: Array<IntArray>,
     attrs: AttributeSet?
 ) :
     View(context, attrs) {
-
     private var cellWidth = 0
     private var cellHeight = 0
     private val pegPaint: Paint = Paint()
     private val pegSlotPaint: Paint = Paint()
-    private val pegSlotWidth: Float = 10F
-    private val pegMargin: Float = 5F
-    private val cornerPaint: Paint = Paint()
-    private var numColumns: Int = cells.size
-    private var numRows: Int = cells[0].size
+    private val markedPegPaint: Paint = Paint()
     private var isFirstClick = true
     private var columnFirst = 0
     private var rowFirst = 0
     private var columnSecond = 0
     private var rowSecond = 0
+    private lateinit var listener: GridViewListener
 
     private fun calculateDimensions() {
-        if (numColumns < 1 || numRows < 1) {
-            return
-        }
-        cellWidth = screenWidth / numColumns
-        cellHeight = (screenHeight) / numRows
+        cellWidth = screenWidth / cells.size
+        cellHeight = (screenHeight) / cells[0].size
         invalidate()
     }
 
@@ -49,59 +39,94 @@ class GridView(
     }
 
     private fun paintCells(canvas: Canvas) {
-        for (i in 0 until numColumns) {
-            for (j in 0 until numRows) {
-
+        for (i in cells.indices) {
+            for (j in cells[i].indices) {
                 val centerX = (((i * cellWidth) + (((i + 1) * cellWidth))) / 2).toFloat()
                 val centerY = (((j * cellHeight) + (((j + 1) * cellHeight))) / 2).toFloat()
-
                 val radius = if (cellWidth < cellHeight)
                     (cellWidth / 2).toFloat()
                 else (cellHeight / 2).toFloat()
 
-                if (cells[i][j] == 1 && cells[i][j] != -1)
-                    canvas.drawCircle(centerX, centerY, radius - pegMargin, pegPaint)
-                else if (cells[i][j] == 0 && cells[i][j] != -1)
-                    canvas.drawCircle(centerX, centerY, radius - pegSlotWidth - pegMargin, pegSlotPaint)
+                if (cells[i][j] == 1)
+                    canvas.drawCircle(centerX, centerY, radius - PEG_MARGIN, pegPaint)
+                else if (cells[i][j] == 0)
+                    canvas.drawCircle(centerX, centerY, radius - PEG_SLOT_WIDTH - PEG_MARGIN, pegSlotPaint)
+                if (cells[i][j] == 2)
+                    canvas.drawCircle(centerX, centerY, radius - PEG_SLOT_WIDTH - PEG_MARGIN, markedPegPaint)
             }
         }
     }
 
+    private fun canMarkSelectedPeg(column: Int, row: Int): Boolean {
+        if ((row - 1 >= 0 && row - 2 >= 0 && cells[column][row] == 1 && cells[column][row - 1] == 1 && cells[column][row - 2] == 0/*north*/) ||
+            (row + 1 < cells[column].size && row + 2 < cells.size && cells[column][row] == 1 && cells[column][row + 1] == 1 && cells[column][row + 2] == 0 /*south*/) ||
+            (column + 1 < cells.size && column + 2 < cells.size && cells[column][row] == 1 && cells[column + 1][row] == 1 && cells[column + 2][row] == 0 /*east*/) ||
+            (column - 1 >= 0 && column - 2 >= 0 && cells[column][row] == 1 && cells[column - 1][row] == 1 && cells[column - 2][row] == 0 /*west*/)
+        )
+            return true
+        return false
+    }
+
+    private fun markPeg(column: Int, row: Int) {
+        cells[column][row] = 2
+    }
+
+    private fun unMarkPeg(column: Int, row: Int) {
+        cells[column][row] = 1
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_DOWN) {
+        if (event.action and MotionEvent.ACTION_MASK == MotionEvent.ACTION_DOWN) {
+            Log.w("action", "screen pressed")
             if (isFirstClick) {
                 columnFirst = (event.x / cellWidth).toInt()
                 rowFirst = (event.y / cellHeight).toInt()
-
-                isFirstClick = false
+                if (canMarkSelectedPeg(columnFirst, rowFirst)) {
+                    isFirstClick = false
+                    markPeg(columnFirst, rowFirst)
+                    invalidate()
+                }
             } else {
                 columnSecond = (event.x / cellWidth).toInt()
                 rowSecond = (event.y / cellHeight).toInt()
 
-                if (rowFirst < numRows && columnFirst < numColumns) {
-
+                if (rowFirst < cells[0].size && columnFirst < cells.size) {
                     if (cells[columnFirst][rowFirst] != -1 && cells[columnSecond][rowSecond] != -1) {
-                        //cells[column][row] = 0
-                        canMove(cells, rowFirst, columnFirst, rowSecond, columnSecond)
-                        Log.e("is game over", isGameOver(cells).toString())
-                    } /*else if (cells[column][row] != -1)
-                    cells[column][row] = 1*/
-
+                        unMarkPeg(columnFirst, rowFirst)
+                        performClick()
+                    }
                     isFirstClick = true
                     invalidate()
                 }
             }
+        } else if (event.action and MotionEvent.ACTION_MASK == MotionEvent.ACTION_UP)
+            Log.w("action", "screen released")
 
-        }
+        return true
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        listener.onGridViewTouch(cells, rowFirst, columnFirst, rowSecond, columnSecond)
         return true
     }
 
     init {
-        cornerPaint.color = Color.WHITE
+        markedPegPaint.color = getColor(context!!, R.color.markedPegColor)
         pegPaint.color = getColor(context!!, R.color.pegColor)
         pegPaint.style = Paint.Style.FILL_AND_STROKE
         pegSlotPaint.style = Paint.Style.STROKE
-        pegSlotPaint.strokeWidth = pegSlotWidth
+        pegSlotPaint.strokeWidth = PEG_SLOT_WIDTH
         pegSlotPaint.color = getColor(context, R.color.pegSlotColor)
+
+        try {
+            listener = context as GridViewListener
+        } catch (err: ClassCastException) {
+            Log.e("error", "must implement GridViewListener")
+        }
     }
+}
+
+interface GridViewListener {
+    fun onGridViewTouch(cells: Array<IntArray>, rowFirst: Int, columnFirst: Int, rowSecond: Int, columnSecond: Int)
 }

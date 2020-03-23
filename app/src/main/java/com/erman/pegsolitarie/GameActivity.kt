@@ -70,42 +70,7 @@ class GameActivity : AppCompatActivity(), GridViewListener, GameOverDialog.GameO
     private fun resetScoreTextView() {
         scoreTextView.text = ""
     }
-/*
-    private fun createPausedDialog():Dialog{
-        /*val dialog = Dialog(this, R.style.Dialog)
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_paused, null)
-        view.resumeButton.setOnClickListener {
-            elapsedTimeChronometer.base = SystemClock.elapsedRealtime() - timeWhenChronoStopped
-            elapsedTimeChronometer.start()
-            dialog.dismiss()
-        }
-        dialog.setTitle(getString(R.string.game_paused))
-        dialog.setCanceledOnTouchOutside(false)
-        dialog.setContentView(view)*/
 
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-
-// 2. Chain together various setter methods to set the dialog characteristics
-
-// 2. Chain together various setter methods to set the dialog characteristics
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_paused, null)
-        view.resumeButton.setOnClickListener {
-            elapsedTimeChronometer.base = SystemClock.elapsedRealtime() - timeWhenChronoStopped
-            elapsedTimeChronometer.start()
-        }
-        builder.setView(view)
-        builder.setTitle("Enter An Administrative Password")
-
-// 3. Get the AlertDialog from create()
-
-// 3. Get the AlertDialog from create()
-        val dialog: AlertDialog = builder.create()
-        dialog.setCanceledOnTouchOutside(false)
-        dialog.show()
-
-        return dialog
-    }
-*/
     private fun pauseGame() {
         timeWhenChronoStopped = SystemClock.elapsedRealtime() - elapsedTimeChronometer.base
         elapsedTimeChronometer.stop()

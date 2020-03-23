@@ -2,7 +2,6 @@ package com.erman.pegsolitarie
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
@@ -11,7 +10,10 @@ import android.view.View
 import androidx.core.content.ContextCompat.getColor
 
 class GridView(
-    context: Context?, private var screenWidth: Int, private var screenHeight: Int, private var cells: Array<IntArray>,
+    context: Context?,
+    private var screenWidth: Int,
+    private var screenHeight: Int,
+    private var cells: Array<IntArray>,
     attrs: AttributeSet?
 ) :
     View(context, attrs) {
@@ -38,21 +40,45 @@ class GridView(
         paintCells(canvas)
     }
 
+    private fun getCenterCoordinates(column: Int, row: Int): Pair<Float, Float> {
+        val centerX = (((column * cellWidth) + (((column + 1) * cellWidth))) / 2).toFloat()
+        val centerY = (((row * cellHeight) + (((row + 1) * cellHeight))) / 2).toFloat()
+
+        return Pair(centerX, centerY)
+    }
+
+    private fun getRadius(): Float {
+        return if (cellWidth < cellHeight)
+            (cellWidth / 2).toFloat()
+        else (cellHeight / 2).toFloat()
+    }
+
     private fun paintCells(canvas: Canvas) {
         for (i in cells.indices) {
             for (j in cells[i].indices) {
-                val centerX = (((i * cellWidth) + (((i + 1) * cellWidth))) / 2).toFloat()
-                val centerY = (((j * cellHeight) + (((j + 1) * cellHeight))) / 2).toFloat()
-                val radius = if (cellWidth < cellHeight)
-                    (cellWidth / 2).toFloat()
-                else (cellHeight / 2).toFloat()
+                val centerPoint = getCenterCoordinates(i, j)
+                val radius = getRadius()
 
                 if (cells[i][j] == 1)
-                    canvas.drawCircle(centerX, centerY, radius - PEG_MARGIN, pegPaint)
+                    canvas.drawCircle(
+                        centerPoint.first,
+                        centerPoint.second,
+                        radius - PEG_MARGIN,
+                        pegPaint
+                    )
                 else if (cells[i][j] == 0)
-                    canvas.drawCircle(centerX, centerY, radius - PEG_SLOT_WIDTH - PEG_MARGIN, pegSlotPaint)
+                    canvas.drawCircle(
+                        centerPoint.first,
+                        centerPoint.second,
+                        radius - PEG_SLOT_WIDTH - PEG_MARGIN,
+                        pegSlotPaint
+                    )
                 if (cells[i][j] == 2)
-                    canvas.drawCircle(centerX, centerY, radius - PEG_SLOT_WIDTH - PEG_MARGIN, markedPegPaint)
+                    canvas.drawCircle(
+                        centerPoint.first,
+                        centerPoint.second,
+                        radius - PEG_MARGIN, markedPegPaint
+                    )
             }
         }
     }
@@ -113,7 +139,8 @@ class GridView(
 
     init {
         markedPegPaint.color = getColor(context!!, R.color.markedPegColor)
-        pegPaint.color = getColor(context!!, R.color.pegColor)
+        markedPegPaint.style = Paint.Style.FILL_AND_STROKE
+        pegPaint.color = getColor(context, R.color.pegColor)
         pegPaint.style = Paint.Style.FILL_AND_STROKE
         pegSlotPaint.style = Paint.Style.STROKE
         pegSlotPaint.strokeWidth = PEG_SLOT_WIDTH
@@ -128,5 +155,11 @@ class GridView(
 }
 
 interface GridViewListener {
-    fun onGridViewTouch(cells: Array<IntArray>, rowFirst: Int, columnFirst: Int, rowSecond: Int, columnSecond: Int)
+    fun onGridViewTouch(
+        cells: Array<IntArray>,
+        rowFirst: Int,
+        columnFirst: Int,
+        rowSecond: Int,
+        columnSecond: Int
+    )
 }

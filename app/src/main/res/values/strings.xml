@@ -1,7 +1,8 @@
 <resources>
+    <string name="select_game">SELECT A GAME BOARD</string>
     <string name="french">French</string>
     <string name="german">German</string>
-    <string name="asymmetrical">Asymmetrical</string>
+    <string name="asymmetrical">Asymmetric</string>
     <string name="english">English</string>
     <string name="diamond">Diamond</string>
     <string name="app_name">Peg Solitaire</string>

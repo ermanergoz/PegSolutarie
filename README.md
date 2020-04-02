@@ -1,3 +1,3 @@
 # Peg Solitarie
 
-![googlePlay](https://github.com/ermanergoz/images-in-readme/blob/master/google-play-badge.png)
+![googlePlay](https://play.google.com/store/apps/details?id=com.erman.pegsolitarie)
